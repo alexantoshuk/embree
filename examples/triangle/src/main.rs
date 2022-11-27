@@ -4,11 +4,10 @@ extern crate cgmath;
 extern crate embree;
 extern crate support;
 
-use cgmath::{Vector3, Vector4};
+use cgmath::Vector3;
 use embree::{Device, Geometry, IntersectContext, RayHitN, RayN, Scene, TriangleMesh};
 
 fn main() {
-    let mut display = support::Display::new(512, 512, "triangle");
     let device = Device::new();
 
     // Make a triangle
@@ -16,9 +15,9 @@ fn main() {
     {
         let mut verts = triangle.vertex_buffer.map();
         let mut tris = triangle.index_buffer.map();
-        verts[0] = Vector4::new(-1.0, 0.0, 0.0, 0.0);
-        verts[1] = Vector4::new(0.0, 1.0, 0.0, 0.0);
-        verts[2] = Vector4::new(1.0, 0.0, 0.0, 0.0);
+        verts[0] = Vector3::new(-1.0, 0.0, 0.0);
+        verts[1] = Vector3::new(0.0, 1.0, 0.0);
+        verts[2] = Vector3::new(1.0, 0.0, 0.0);
 
         tris[0] = Vector3::new(0, 1, 2);
     }
@@ -31,6 +30,7 @@ fn main() {
 
     let mut intersection_ctx = IntersectContext::coherent();
 
+    let display = support::Display::new(512, 512, "triangle", None);
     display.run(|image, _, _| {
         let img_dims = image.dimensions();
         // Render the scene
@@ -47,6 +47,7 @@ fn main() {
             }
 
             let mut ray_hit = RayHitN::new(rays);
+
             rtscene.intersect_stream_soa(&mut intersection_ctx, &mut ray_hit);
             for (i, hit) in ray_hit.hit.iter().enumerate().filter(|(_i, h)| h.hit()) {
                 let p = image.get_pixel_mut(i as u32, j);

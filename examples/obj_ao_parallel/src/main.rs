@@ -194,7 +194,6 @@ impl<'embree> AOIntegrator<'embree> {
 }
 
 fn main() {
-    let mut display = support::Display::new(512, 512, "OBJ AO Viewer");
     let device = Device::new();
 
     // Expect <obj_path> [max_distance]
@@ -210,7 +209,7 @@ fn main() {
                 .parse::<f32>()
                 .expect("Impossible to parse the max distance: need to be float");
             if d <= 0.0 {
-                panic!(format!("Max distance need to be more than 0.0 ({})", d));
+                panic!("Max distance need to be more than 0.0 ({})", d);
             }
             Some(d)
         }
@@ -242,11 +241,10 @@ fn main() {
                     mesh.positions[i * 3 + 1],
                     mesh.positions[i * 3 + 2],
                 ));
-                verts[i] = Vector4::new(
+                verts[i] = Vector3::new(
                     mesh.positions[i * 3],
                     mesh.positions[i * 3 + 1],
                     mesh.positions[i * 3 + 2],
-                    0.0,
                 );
             }
 
@@ -262,7 +260,7 @@ fn main() {
         tri_geom.commit();
         tri_geoms.push(tri_geom);
     }
-    display = display.aabb(aabb);
+    let display = support::Display::new(512, 512, "OBJ AO Viewer", Some(aabb));
 
     println!("Commit the scene ... ");
     let mut scene = Scene::new(&device);
@@ -321,10 +319,12 @@ fn main() {
             .for_each(|(y, row)| {
                 let mut rng = rand::thread_rng();
                 for (x, p) in row.iter_mut().enumerate() {
+                    // for s in 0..16 {
                     let u = Point2::new(rng.gen(), rng.gen());
                     // Weighting average
                     (*p) =
                         (*p * spp as f32 + scene.render(x as u32, y as u32, u)) / (spp + 1) as f32;
+                    // }
                 }
             });
         spp += 1;

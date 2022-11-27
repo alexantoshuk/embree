@@ -7,12 +7,11 @@ extern crate tobj;
 
 use std::path::Path;
 
-use cgmath::{InnerSpace, Vector3, Vector4};
+use cgmath::{InnerSpace, Vector3};
 use embree::{Device, Geometry, IntersectContext, Ray, RayHit, Scene, TriangleMesh};
 use support::{Camera, AABB};
 
 fn main() {
-    let mut display = support::Display::new(512, 512, "OBJ Viewer");
     let device = Device::new();
 
     let args: Vec<_> = std::env::args().collect();
@@ -34,17 +33,13 @@ fn main() {
             let mut verts = tris.vertex_buffer.map();
             let mut tris = tris.index_buffer.map();
             for i in 0..mesh.positions.len() / 3 {
-                aabb = aabb.union_vec(&Vector3::new(
+                let p = Vector3::new(
                     mesh.positions[i * 3],
                     mesh.positions[i * 3 + 1],
                     mesh.positions[i * 3 + 2],
-                ));
-                verts[i] = Vector4::new(
-                    mesh.positions[i * 3],
-                    mesh.positions[i * 3 + 1],
-                    mesh.positions[i * 3 + 2],
-                    0.0,
                 );
+                aabb = aabb.union_vec(&p);
+                verts[i] = p;
             }
 
             for i in 0..mesh.indices.len() / 3 {
@@ -59,8 +54,8 @@ fn main() {
         tri_geom.commit();
         tri_geoms.push(tri_geom);
     }
-    display = display.aabb(aabb);
 
+    let display = support::Display::new(512, 512, "OBJ Viewer", Some(aabb));
     let mut scene = Scene::new(&device);
     let mut mesh_ids = Vec::with_capacity(models.len());
     for g in tri_geoms.drain(0..) {

@@ -10,6 +10,6 @@ cgmath = "0.18.0"
 clock_ticks = "0.1.1"
 
 [dependencies.glium]
-version = "0.25.0"
+version = "0.32"
 default = ["glutin"]
 

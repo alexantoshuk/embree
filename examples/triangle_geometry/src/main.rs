@@ -14,14 +14,14 @@ fn make_cube<'a>(device: &'a Device) -> Geometry<'a> {
         let mut verts = mesh.vertex_buffer.map();
         let mut tris = mesh.index_buffer.map();
 
-        verts[0] = Vector4::new(-1.0, -1.0, -1.0, 0.0);
-        verts[1] = Vector4::new(-1.0, -1.0, 1.0, 0.0);
-        verts[2] = Vector4::new(-1.0, 1.0, -1.0, 0.0);
-        verts[3] = Vector4::new(-1.0, 1.0, 1.0, 0.0);
-        verts[4] = Vector4::new(1.0, -1.0, -1.0, 0.0);
-        verts[5] = Vector4::new(1.0, -1.0, 1.0, 0.0);
-        verts[6] = Vector4::new(1.0, 1.0, -1.0, 0.0);
-        verts[7] = Vector4::new(1.0, 1.0, 1.0, 0.0);
+        verts[0] = Vector3::new(-1.0, -1.0, -1.0);
+        verts[1] = Vector3::new(-1.0, -1.0, 1.0);
+        verts[2] = Vector3::new(-1.0, 1.0, -1.0);
+        verts[3] = Vector3::new(-1.0, 1.0, 1.0);
+        verts[4] = Vector3::new(1.0, -1.0, -1.0);
+        verts[5] = Vector3::new(1.0, -1.0, 1.0);
+        verts[6] = Vector3::new(1.0, 1.0, -1.0);
+        verts[7] = Vector3::new(1.0, 1.0, 1.0);
 
         // left side
         tris[0] = Vector3::new(0, 2, 1);
@@ -56,10 +56,10 @@ fn make_ground_plane<'a>(device: &'a Device) -> Geometry<'a> {
     {
         let mut verts = mesh.vertex_buffer.map();
         let mut quads = mesh.index_buffer.map();
-        verts[0] = Vector4::new(-10.0, -2.0, -10.0, 0.0);
-        verts[1] = Vector4::new(-10.0, -2.0, 10.0, 0.0);
-        verts[2] = Vector4::new(10.0, -2.0, 10.0, 0.0);
-        verts[3] = Vector4::new(10.0, -2.0, -10.0, 0.0);
+        verts[0] = Vector3::new(-10.0, -2.0, -10.0);
+        verts[1] = Vector3::new(-10.0, -2.0, 10.0);
+        verts[2] = Vector3::new(10.0, -2.0, 10.0);
+        verts[3] = Vector3::new(10.0, -2.0, -10.0);
 
         quads[0] = Vector4::new(0, 1, 2, 3);
     }
@@ -69,7 +69,7 @@ fn make_ground_plane<'a>(device: &'a Device) -> Geometry<'a> {
 }
 
 fn main() {
-    let mut display = support::Display::new(512, 512, "triangle geometry");
+    let mut display = support::Display::new(512, 512, "triangle geometry", None);
     let device = Device::new();
     let cube = make_cube(&device);
     let ground = make_ground_plane(&device);
