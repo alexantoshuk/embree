@@ -1,4 +1,4 @@
-use cgmath::Vector4;
+use cgmath::{Vector3, Vector4};
 
 use buffer::Buffer;
 use device::Device;
@@ -9,7 +9,7 @@ use {BufferType, Format, GeometryType};
 pub struct QuadMesh<'a> {
     device: &'a Device,
     pub(crate) handle: RTCGeometry,
-    pub vertex_buffer: Buffer<'a, Vector4<f32>>,
+    pub vertex_buffer: Buffer<'a, Vector3<f32>>,
     pub index_buffer: Buffer<'a, Vector4<u32>>,
 }
 
@@ -26,7 +26,7 @@ impl<'a> QuadMesh<'a> {
                 Format::FLOAT3,
                 vertex_buffer.handle,
                 0,
-                16,
+                12,
                 num_verts,
             );
             vertex_buffer.set_attachment(h, BufferType::VERTEX, 0);
