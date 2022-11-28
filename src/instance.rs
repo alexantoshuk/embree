@@ -1,12 +1,12 @@
 use std::os::raw;
 
-use cgmath::Matrix4;
+use ultraviolet::Mat4;
 
-use device::Device;
-use geometry::Geometry;
-use scene::{CommittedScene, Scene};
-use sys::*;
-use {BufferType, Format, GeometryType};
+use crate::device::Device;
+use crate::geometry::Geometry;
+use crate::scene::{CommittedScene, Scene};
+use crate::sys::*;
+use crate::{BufferType, Format, GeometryType};
 
 pub struct Instance<'a> {
     device: &'a Device,
@@ -27,8 +27,8 @@ impl<'a> Instance<'a> {
             scene: scene,
         }
     }
-    pub fn set_transform(&mut self, transform: &Matrix4<f32>) {
-        let mat: &[f32; 16] = transform.as_ref();
+    pub fn set_transform(&mut self, transform: &Mat4) {
+        let mat: &[f32; 16] = transform.as_array();
         // Will this be fine if we don't set the number of timesteps? Default should be 1?
         unsafe {
             rtcSetGeometryTransform(

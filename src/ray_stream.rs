@@ -1,14 +1,14 @@
-use cgmath::Vector3;
 use std::iter::Iterator;
 use std::marker::PhantomData;
 use std::{f32, u32};
+use ultraviolet::Vec3;
 
-use soa_ray::{
+use crate::soa_ray::{
     SoAHit, SoAHitIter, SoAHitIterMut, SoAHitRef, SoARay, SoARayIter, SoARayIterMut, SoARayRef,
     SoARayRefMut,
 };
-use sys;
-use {aligned_vector, aligned_vector_init};
+use crate::sys;
+use crate::{aligned_vector, aligned_vector_init};
 
 /// A ray stream stored in SoA format
 pub struct RayN {
@@ -73,19 +73,19 @@ impl RayN {
 }
 
 impl SoARay for RayN {
-    fn org(&self, i: usize) -> Vector3<f32> {
-        Vector3::new(self.org_x[i], self.org_y[i], self.org_z[i])
+    fn org(&self, i: usize) -> Vec3 {
+        Vec3::new(self.org_x[i], self.org_y[i], self.org_z[i])
     }
-    fn set_org(&mut self, i: usize, o: Vector3<f32>) {
+    fn set_org(&mut self, i: usize, o: Vec3) {
         self.org_x[i] = o.x;
         self.org_y[i] = o.y;
         self.org_z[i] = o.z;
     }
 
-    fn dir(&self, i: usize) -> Vector3<f32> {
-        Vector3::new(self.dir_x[i], self.dir_y[i], self.dir_z[i])
+    fn dir(&self, i: usize) -> Vec3 {
+        Vec3::new(self.dir_x[i], self.dir_y[i], self.dir_z[i])
     }
-    fn set_dir(&mut self, i: usize, d: Vector3<f32>) {
+    fn set_dir(&mut self, i: usize, d: Vec3) {
         self.dir_x[i] = d.x;
         self.dir_y[i] = d.y;
         self.dir_z[i] = d.z;
@@ -188,10 +188,10 @@ impl HitN {
 }
 
 impl SoAHit for HitN {
-    fn normal(&self, i: usize) -> Vector3<f32> {
-        Vector3::new(self.ng_x[i], self.ng_y[i], self.ng_z[i])
+    fn normal(&self, i: usize) -> Vec3 {
+        Vec3::new(self.ng_x[i], self.ng_y[i], self.ng_z[i])
     }
-    fn set_normal(&mut self, i: usize, n: Vector3<f32>) {
+    fn set_normal(&mut self, i: usize, n: Vec3) {
         self.ng_x[i] = n.x;
         self.ng_y[i] = n.y;
         self.ng_z[i] = n.z;

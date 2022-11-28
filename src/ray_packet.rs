@@ -1,12 +1,12 @@
-use cgmath::Vector3;
 use std::marker::PhantomData;
 use std::{f32, u32};
+use ultraviolet::Vec3;
 
-use soa_ray::{
+use crate::soa_ray::{
     SoAHit, SoAHitIter, SoAHitIterMut, SoAHitRef, SoARay, SoARayIter, SoARayIterMut, SoARayRef,
     SoARayRefMut,
 };
-use sys;
+use crate::sys;
 
 pub type Ray4 = sys::RTCRay4;
 pub type Hit4 = sys::RTCHit4;
@@ -15,21 +15,16 @@ pub type RayHit4 = sys::RTCRayHit4;
 impl Ray4 {
     pub fn empty() -> Ray4 {
         Ray4::segment(
-            [Vector3::new(0.0, 0.0, 0.0); 4],
-            [Vector3::new(0.0, 0.0, 0.0); 4],
+            [Vec3::new(0.0, 0.0, 0.0); 4],
+            [Vec3::new(0.0, 0.0, 0.0); 4],
             [0.0; 4],
             [f32::INFINITY; 4],
         )
     }
-    pub fn new(origin: [Vector3<f32>; 4], dir: [Vector3<f32>; 4]) -> Ray4 {
+    pub fn new(origin: [Vec3; 4], dir: [Vec3; 4]) -> Ray4 {
         Ray4::segment(origin, dir, [0.0; 4], [f32::INFINITY; 4])
     }
-    pub fn segment(
-        origin: [Vector3<f32>; 4],
-        dir: [Vector3<f32>; 4],
-        tnear: [f32; 4],
-        tfar: [f32; 4],
-    ) -> Ray4 {
+    pub fn segment(origin: [Vec3; 4], dir: [Vec3; 4], tnear: [f32; 4], tfar: [f32; 4]) -> Ray4 {
         sys::RTCRay4 {
             org_x: [origin[0].x, origin[1].x, origin[2].x, origin[3].x],
             org_y: [origin[0].y, origin[1].y, origin[2].y, origin[3].y],
@@ -54,19 +49,19 @@ impl Ray4 {
 }
 
 impl SoARay for Ray4 {
-    fn org(&self, i: usize) -> Vector3<f32> {
-        Vector3::new(self.org_x[i], self.org_y[i], self.org_z[i])
+    fn org(&self, i: usize) -> Vec3 {
+        Vec3::new(self.org_x[i], self.org_y[i], self.org_z[i])
     }
-    fn set_org(&mut self, i: usize, o: Vector3<f32>) {
+    fn set_org(&mut self, i: usize, o: Vec3) {
         self.org_x[i] = o.x;
         self.org_y[i] = o.y;
         self.org_z[i] = o.z;
     }
 
-    fn dir(&self, i: usize) -> Vector3<f32> {
-        Vector3::new(self.dir_x[i], self.dir_y[i], self.dir_z[i])
+    fn dir(&self, i: usize) -> Vec3 {
+        Vec3::new(self.dir_x[i], self.dir_y[i], self.dir_z[i])
     }
-    fn set_dir(&mut self, i: usize, d: Vector3<f32>) {
+    fn set_dir(&mut self, i: usize, d: Vec3) {
         self.dir_x[i] = d.x;
         self.dir_y[i] = d.y;
         self.dir_z[i] = d.z;
@@ -143,10 +138,10 @@ impl Hit4 {
 }
 
 impl SoAHit for Hit4 {
-    fn normal(&self, i: usize) -> Vector3<f32> {
-        Vector3::new(self.Ng_x[i], self.Ng_y[i], self.Ng_z[i])
+    fn normal(&self, i: usize) -> Vec3 {
+        Vec3::new(self.Ng_x[i], self.Ng_y[i], self.Ng_z[i])
     }
-    fn set_normal(&mut self, i: usize, n: Vector3<f32>) {
+    fn set_normal(&mut self, i: usize, n: Vec3) {
         self.Ng_x[i] = n.x;
         self.Ng_y[i] = n.y;
         self.Ng_z[i] = n.z;

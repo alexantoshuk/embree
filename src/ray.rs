@@ -1,7 +1,7 @@
-use cgmath::Vector3;
 use std::{f32, u32};
+use ultraviolet::Vec3;
 
-use sys;
+use crate::sys;
 
 pub type Ray = sys::RTCRay;
 pub type Hit = sys::RTCHit;
@@ -10,10 +10,10 @@ pub type IntersectContext = sys::RTCIntersectContext;
 
 impl Ray {
     /// Create a new ray starting at `origin` and heading in direction `dir`
-    pub fn new(origin: Vector3<f32>, dir: Vector3<f32>) -> Ray {
+    pub fn new(origin: Vec3, dir: Vec3) -> Ray {
         Ray::segment(origin, dir, 0.0, f32::INFINITY)
     }
-    pub fn segment(origin: Vector3<f32>, dir: Vector3<f32>, tnear: f32, tfar: f32) -> Ray {
+    pub fn segment(origin: Vec3, dir: Vec3, tnear: f32, tfar: f32) -> Ray {
         sys::RTCRay {
             org_x: origin.x,
             org_y: origin.y,

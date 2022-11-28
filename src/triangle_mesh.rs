@@ -1,16 +1,16 @@
-use cgmath::Vector3;
+use ultraviolet::Vec3;
 
-use buffer::Buffer;
-use device::Device;
-use geometry::Geometry;
-use sys::*;
-use {BufferType, Format, GeometryType};
+use crate::buffer::Buffer;
+use crate::device::Device;
+use crate::geometry::Geometry;
+use crate::sys::*;
+use crate::{BufferType, Format, GeometryType};
 
 pub struct TriangleMesh<'a> {
     device: &'a Device,
     pub(crate) handle: RTCGeometry,
-    pub vertex_buffer: Buffer<'a, Vector3<f32>>,
-    pub index_buffer: Buffer<'a, Vector3<u32>>,
+    pub vertex_buffer: Buffer<'a, Vec3>,
+    pub index_buffer: Buffer<'a, [u32; 3]>,
 }
 
 impl<'a> TriangleMesh<'a> {

@@ -1,19 +1,19 @@
-use cgmath::{Vector2, Vector3, Vector4};
+use ultraviolet::{Vec2, Vec3, Vec4};
 
-use buffer::Buffer;
-use device::Device;
-use geometry::Geometry;
-use sys::*;
-use {BufferType, CurveType, Format, GeometryType};
+use crate::buffer::Buffer;
+use crate::device::Device;
+use crate::geometry::Geometry;
+use crate::sys::*;
+use crate::{BufferType, CurveType, Format, GeometryType};
 
 pub struct HermiteCurve<'a> {
     device: &'a Device,
     pub(crate) handle: RTCGeometry,
-    pub vertex_buffer: Buffer<'a, Vector4<f32>>,
+    pub vertex_buffer: Buffer<'a, Vec4>,
     pub index_buffer: Buffer<'a, u32>,
-    pub tangent_buffer: Buffer<'a, Vector4<f32>>,
-    pub normal_derivative_buffer: Option<Buffer<'a, Vector3<f32>>>,
-    pub normal_buffer: Option<Buffer<'a, Vector3<f32>>>,
+    pub tangent_buffer: Buffer<'a, Vec4>,
+    pub normal_derivative_buffer: Option<Buffer<'a, Vec3>>,
+    pub normal_buffer: Option<Buffer<'a, Vec3>>,
 }
 
 impl<'a> HermiteCurve<'a> {
