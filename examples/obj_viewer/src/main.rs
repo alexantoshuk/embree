@@ -1,15 +1,7 @@
-#![allow(dead_code)]
-
-extern crate cgmath;
-extern crate embree;
-extern crate support;
-extern crate tobj;
-
-use std::path::Path;
-
-use cgmath::{InnerSpace, Vector3};
 use embree::{Device, Geometry, IntersectContext, Ray, RayHit, Scene, TriangleMesh};
+use std::path::Path;
 use support::{Camera, AABB};
+use ultraviolet::*;
 
 fn main() {
     let device = Device::new();
@@ -33,7 +25,7 @@ fn main() {
             let mut verts = tris.vertex_buffer.map();
             let mut tris = tris.index_buffer.map();
             for i in 0..mesh.positions.len() / 3 {
-                let p = Vector3::new(
+                let p = Vec3::new(
                     mesh.positions[i * 3],
                     mesh.positions[i * 3 + 1],
                     mesh.positions[i * 3 + 2],
@@ -43,11 +35,11 @@ fn main() {
             }
 
             for i in 0..mesh.indices.len() / 3 {
-                tris[i] = Vector3::new(
+                tris[i] = [
                     mesh.indices[i * 3],
                     mesh.indices[i * 3 + 1],
                     mesh.indices[i * 3 + 2],
-                );
+                ];
             }
         }
         let mut tri_geom = Geometry::Triangle(tris);
@@ -96,27 +88,27 @@ fn main() {
                             mesh.indices[prim * 3 + 2] as usize,
                         ];
 
-                        let na = Vector3::new(
+                        let na = Vec3::new(
                             mesh.normals[tri[0] * 3],
                             mesh.normals[tri[0] * 3 + 1],
                             mesh.normals[tri[0] * 3 + 2],
                         );
 
-                        let nb = Vector3::new(
+                        let nb = Vec3::new(
                             mesh.normals[tri[1] * 3],
                             mesh.normals[tri[1] * 3 + 1],
                             mesh.normals[tri[1] * 3 + 2],
                         );
 
-                        let nc = Vector3::new(
+                        let nc = Vec3::new(
                             mesh.normals[tri[2] * 3],
                             mesh.normals[tri[2] * 3 + 1],
                             mesh.normals[tri[2] * 3 + 2],
                         );
 
                         let w = 1.0 - ray_hit.hit.u - ray_hit.hit.v;
-                        let mut n = (na * w + nb * ray_hit.hit.u + nc * ray_hit.hit.v).normalize();
-                        n = (n + Vector3::new(1.0, 1.0, 1.0)) * 0.5;
+                        let mut n = (na * w + nb * ray_hit.hit.u + nc * ray_hit.hit.v).normalized();
+                        n = (n + Vec3::new(1.0, 1.0, 1.0)) * 0.5;
 
                         p[0] = (n.x * 255.0) as u8;
                         p[1] = (n.y * 255.0) as u8;

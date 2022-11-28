@@ -1,11 +1,5 @@
-#![allow(dead_code)]
-
-extern crate cgmath;
-extern crate embree;
-extern crate support;
-
-use cgmath::Vector3;
 use embree::{Device, Geometry, IntersectContext, RayHitN, RayN, Scene, TriangleMesh};
+use ultraviolet::*;
 
 fn main() {
     let device = Device::new();
@@ -15,11 +9,11 @@ fn main() {
     {
         let mut verts = triangle.vertex_buffer.map();
         let mut tris = triangle.index_buffer.map();
-        verts[0] = Vector3::new(-1.0, 0.0, 0.0);
-        verts[1] = Vector3::new(0.0, 1.0, 0.0);
-        verts[2] = Vector3::new(1.0, 0.0, 0.0);
+        verts[0] = Vec3::new(-1.0, 0.0, 0.0);
+        verts[1] = Vec3::new(0.0, 1.0, 0.0);
+        verts[2] = Vec3::new(1.0, 0.0, 0.0);
 
-        tris[0] = Vector3::new(0, 1, 2);
+        tris[0] = [0, 1, 2];
     }
     let mut tri_geom = Geometry::Triangle(triangle);
     tri_geom.commit();
@@ -42,8 +36,8 @@ fn main() {
             for (i, mut ray) in rays.iter_mut().enumerate() {
                 let x = (i as f32 + 0.5) / img_dims.0 as f32 - 0.5;
                 let dir_len = f32::sqrt(x * x + y * y + 1.0);
-                ray.set_origin(Vector3::new(0.0, 0.5, 2.0));
-                ray.set_dir(Vector3::new(x / dir_len, y / dir_len, -1.0 / dir_len));
+                ray.set_origin(Vec3::new(0.0, 0.5, 2.0));
+                ray.set_dir(Vec3::new(x / dir_len, y / dir_len, -1.0 / dir_len));
             }
 
             let mut ray_hit = RayHitN::new(rays);

@@ -1,6 +1,5 @@
+use crate::AABB;
 use arcball::ArcballCamera;
-use cgmath::InnerSpace;
-use cgmath::{Matrix4, SquareMatrix, Vector2, Vector3, Vector4};
 use clock_ticks;
 use glium::glutin::event::{
     ElementState, Event, MouseButton, MouseScrollDelta, VirtualKeyCode, WindowEvent,
@@ -12,7 +11,7 @@ use glium::Texture2d;
 use glium::{self, glutin, Surface};
 use image::RgbImage;
 use std::{thread::sleep, time::Duration};
-use AABB;
+use ultraviolet::*;
 
 /// Manager to display the rendered image in an interactive window.
 pub struct Display {
@@ -23,12 +22,12 @@ pub struct Display {
 
 #[derive(Debug)]
 pub struct CameraPose {
-    pub pos: Vector3<f32>,
-    pub dir: Vector3<f32>,
-    pub up: Vector3<f32>,
+    pub pos: Vec3,
+    pub dir: Vec3,
+    pub up: Vec3,
 }
 impl CameraPose {
-    fn new(pos: Vector3<f32>, dir: Vector3<f32>, up: Vector3<f32>) -> CameraPose {
+    fn new(pos: Vec3, dir: Vec3, up: Vec3) -> CameraPose {
         CameraPose { pos, dir, up }
     }
 }
@@ -62,14 +61,14 @@ impl Display {
         let mut arcball_camera = if let Some(aabb) = &self.aabb {
             let mut arcball = ArcballCamera::new(
                 aabb.center(),
-                aabb.size().magnitude() / 2.0,
+                aabb.size().mag() / 2.0,
                 [window_dims.0 as f32, window_dims.1 as f32],
             );
             arcball.zoom(-10.0, 0.16);
             arcball
         } else {
             let mut arcball = ArcballCamera::new(
-                Vector3::new(0.0, 0.0, 0.0),
+                Vec3::new(0.0, 0.0, 0.0),
                 0.1,
                 [window_dims.0 as f32, window_dims.1 as f32],
             );
@@ -77,11 +76,11 @@ impl Display {
             arcball
         };
         arcball_camera.rotate(
-            Vector2::new(
+            Vec2::new(
                 self.window_dims.0 as f32 / 2.0,
                 self.window_dims.1 as f32 / 4.0,
             ),
-            Vector2::new(
+            Vec2::new(
                 self.window_dims.0 as f32 / 2.0,
                 self.window_dims.1 as f32 / 3.0,
             ),
@@ -109,12 +108,12 @@ impl Display {
                             let prev = prev_mouse.unwrap();
                             if mouse_pressed[0] {
                                 arcball_camera.rotate(
-                                    Vector2::new(position.x as f32, prev.y as f32),
-                                    Vector2::new(prev.x as f32, position.y as f32),
+                                    Vec2::new(position.x as f32, prev.y as f32),
+                                    Vec2::new(prev.x as f32, position.y as f32),
                                 );
                                 // println!("rotate");
                             } else if mouse_pressed[1] {
-                                let mouse_delta = Vector2::new(
+                                let mouse_delta = Vec2::new(
                                     (prev.x - position.x) as f32,
                                     (position.y - prev.y) as f32,
                                 );

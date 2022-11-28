@@ -1,26 +1,17 @@
-#![allow(dead_code)]
-
-extern crate cgmath;
-extern crate embree;
-extern crate rand;
-extern crate rayon;
-extern crate support;
-extern crate tobj;
-use std::path::Path;
-
-use cgmath::{InnerSpace, Matrix3, Point2, Vector2, Vector3, Vector4};
 use embree::{Device, Geometry, IntersectContext, Ray, RayHit, Scene, TriangleMesh};
 use rand::prelude::*;
 use rayon::prelude::*;
+use std::path::Path;
 use support::{Camera, AABB};
+use ultraviolet::*;
 
 /// Function to sample a point inside a 2D disk
-pub fn concentric_sample_disk(u: Point2<f32>) -> Point2<f32> {
+pub fn concentric_sample_disk(u: Vec2) -> Vec2 {
     // map uniform random numbers to $[-1,1]^2$
-    let u_offset: Point2<f32> = u * 2.0 as f32 - Vector2 { x: 1.0, y: 1.0 };
+    let u_offset: Vec2 = u * 2.0 as f32 - Vec2 { x: 1.0, y: 1.0 };
     // handle degeneracy at the origin
     if u_offset.x == 0.0 as f32 && u_offset.y == 0.0 as f32 {
-        return Point2 { x: 0.0, y: 0.0 };
+        return Vec2 { x: 0.0, y: 0.0 };
     }
     // apply concentric mapping to point
     let theta: f32;
@@ -33,41 +24,41 @@ pub fn concentric_sample_disk(u: Point2<f32>) -> Point2<f32> {
         theta =
             std::f32::consts::FRAC_PI_2 - std::f32::consts::FRAC_PI_4 * (u_offset.x / u_offset.y);
     }
-    Point2 {
+    Vec2 {
         x: theta.cos(),
         y: theta.sin(),
     } * r
 }
 /// Function to sample cosine-weighted hemisphere
-pub fn cosine_sample_hemisphere(u: Point2<f32>) -> Vector3<f32> {
-    let d: Point2<f32> = concentric_sample_disk(u);
+pub fn cosine_sample_hemisphere(u: Vec2) -> Vec3 {
+    let d: Vec2 = concentric_sample_disk(u);
     let z: f32 = (0.0 as f32).max(1.0 as f32 - d.x * d.x - d.y * d.y).sqrt();
-    Vector3 { x: d.x, y: d.y, z }
+    Vec3 { x: d.x, y: d.y, z }
 }
 
 // "Building an Orthonormal Basis, Revisited" by Duff et al., JCGT, 2017
 // http://jcgt.org/published/0006/01/01/
-pub struct Frame(Matrix3<f32>);
+pub struct Frame(Mat3);
 impl Frame {
-    pub fn new(n: Vector3<f32>) -> Frame {
+    pub fn new(n: Vec3) -> Frame {
         let sign = n.z.signum();
         let a = -1.0 / (sign + n.z);
         let b = n.x * n.y * a;
         Frame {
-            0: Matrix3 {
-                x: Vector3::new(1.0 + sign * n.x * n.x * a, sign * b, -sign * n.x),
-                y: Vector3::new(b, sign + n.y * n.y * a, -n.y),
-                z: n,
-            },
+            0: Mat3::new(
+                Vec3::new(1.0 + sign * n.x * n.x * a, sign * b, -sign * n.x),
+                Vec3::new(b, sign + n.y * n.y * a, -n.y),
+                n,
+            ),
         }
     }
 
-    pub fn to_world(&self, v: Vector3<f32>) -> Vector3<f32> {
-        self.0.x * v.x + self.0.y * v.y + self.0.z * v.z
+    pub fn to_world(&self, v: Vec3) -> Vec3 {
+        self.0[0] * v.x + self.0[1] * v.y + self.0[2] * v.z
     }
 
-    pub fn to_local(&self, v: Vector3<f32>) -> Vector3<f32> {
-        Vector3::new(v.dot(self.0.x), v.dot(self.0.y), v.dot(self.0.z))
+    pub fn to_local(&self, v: Vec3) -> Vec3 {
+        Vec3::new(v.dot(self.0[0]), v.dot(self.0[1]), v.dot(self.0[2]))
     }
 }
 
@@ -101,7 +92,7 @@ impl<'embree> AOIntegrator<'embree> {
     }
 
     // Simple AO computation method
-    pub fn render(&self, i: u32, j: u32, u: Point2<f32>) -> f32 {
+    pub fn render(&self, i: u32, j: u32, u: Vec2) -> f32 {
         let dir = self.camera.ray_dir((i as f32 + 0.5, j as f32 + 0.5));
         let ray = Ray::new(self.camera.pos, dir);
         let mut ray_hit = RayHit::new(ray);
@@ -124,19 +115,19 @@ impl<'embree> AOIntegrator<'embree> {
                     ];
 
                     // Retrive the different normal vectors
-                    let na = Vector3::new(
+                    let na = Vec3::new(
                         mesh.normals[tri[0] * 3],
                         mesh.normals[tri[0] * 3 + 1],
                         mesh.normals[tri[0] * 3 + 2],
                     );
 
-                    let nb = Vector3::new(
+                    let nb = Vec3::new(
                         mesh.normals[tri[1] * 3],
                         mesh.normals[tri[1] * 3 + 1],
                         mesh.normals[tri[1] * 3 + 2],
                     );
 
-                    let nc = Vector3::new(
+                    let nc = Vec3::new(
                         mesh.normals[tri[2] * 3],
                         mesh.normals[tri[2] * 3 + 1],
                         mesh.normals[tri[2] * 3 + 2],
@@ -144,12 +135,12 @@ impl<'embree> AOIntegrator<'embree> {
 
                     // Interpolate
                     let w = 1.0 - ray_hit.hit.u - ray_hit.hit.v;
-                    (na * w + nb * ray_hit.hit.u + nc * ray_hit.hit.v).normalize()
+                    (na * w + nb * ray_hit.hit.u + nc * ray_hit.hit.v).normalized()
                 } else {
                     // As the mesh normal is not provided
                     // we will uses the geometric normals
                     // fortunately, embree computes this information for us
-                    Vector3::new(ray_hit.hit.Ng_x, ray_hit.hit.Ng_y, ray_hit.hit.Ng_z).normalize()
+                    Vec3::new(ray_hit.hit.Ng_x, ray_hit.hit.Ng_y, ray_hit.hit.Ng_z).normalized()
                 }
             };
 
@@ -236,12 +227,12 @@ fn main() {
             let mut verts = tris.vertex_buffer.map();
             let mut tris = tris.index_buffer.map();
             for i in 0..mesh.positions.len() / 3 {
-                aabb = aabb.union_vec(&Vector3::new(
+                aabb = aabb.union_vec(&Vec3::new(
                     mesh.positions[i * 3],
                     mesh.positions[i * 3 + 1],
                     mesh.positions[i * 3 + 2],
                 ));
-                verts[i] = Vector3::new(
+                verts[i] = Vec3::new(
                     mesh.positions[i * 3],
                     mesh.positions[i * 3 + 1],
                     mesh.positions[i * 3 + 2],
@@ -249,11 +240,11 @@ fn main() {
             }
 
             for i in 0..mesh.indices.len() / 3 {
-                tris[i] = Vector3::new(
+                tris[i] = [
                     mesh.indices[i * 3],
                     mesh.indices[i * 3 + 1],
                     mesh.indices[i * 3 + 2],
-                );
+                ];
             }
         }
         let mut tri_geom = Geometry::Triangle(tris);
@@ -276,9 +267,9 @@ fn main() {
         models,
         mesh_ids,
         camera: Camera::look_at(
-            Vector3::new(-1.0, 0.0, 0.0),
-            Vector3::new(0.0, 0.0, 0.0),
-            Vector3::new(0.0, 1.0, 0.0),
+            Vec3::new(-1.0, 0.0, 0.0),
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.0, 1.0, 0.0),
             55.0,
             (512, 512),
         ),
@@ -320,7 +311,7 @@ fn main() {
                 let mut rng = rand::thread_rng();
                 for (x, p) in row.iter_mut().enumerate() {
                     // for s in 0..16 {
-                    let u = Point2::new(rng.gen(), rng.gen());
+                    let u = Vec2::new(rng.gen(), rng.gen());
                     // Weighting average
                     (*p) =
                         (*p * spp as f32 + scene.render(x as u32, y as u32, u)) / (spp + 1) as f32;

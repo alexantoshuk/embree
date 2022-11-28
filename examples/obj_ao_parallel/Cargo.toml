@@ -2,11 +2,12 @@
 name = "obj_ao_parallel"
 version = "0.1.0"
 authors = ["Will Usher <willusher.life@gmail.com>"]
+edition = "2021"
 
 [dependencies]
 embree = { path = "../../" }
 support = { path = "../support" }
-cgmath = "0.18.0"
+ultraviolet = "0.9"
 tobj = "0.1.6"
 rayon = "1.3"
 rand = "0.7"

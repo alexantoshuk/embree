@@ -1,23 +1,13 @@
-#![allow(dead_code)]
-
-extern crate cgmath;
-extern crate embree;
-extern crate support;
-
-use cgmath::{InnerSpace, Matrix, Matrix4, SquareMatrix, Vector3, Vector4};
 use embree::{
     Device, Geometry, Instance, IntersectContext, QuadMesh, Ray, RayHit, Scene, TriangleMesh,
 };
 use std::{f32, u32};
 use support::Camera;
+use ultraviolet::*;
 
 /// Make a triangulated sphere, from the Embree tutorial:
 /// https://github.com/embree/embree/blob/master/tutorials/instanced_geometry/instanced_geometry_device.cpp
-fn make_triangulated_sphere<'a>(
-    device: &'a Device,
-    pos: Vector3<f32>,
-    radius: f32,
-) -> Geometry<'a> {
+fn make_triangulated_sphere<'a>(device: &'a Device, pos: Vec3, radius: f32) -> Geometry<'a> {
     let num_phi = 5;
     let num_theta = 2 * num_phi;
     let mut mesh = TriangleMesh::unanimated(
@@ -52,15 +42,11 @@ fn make_triangulated_sphere<'a>(
                 let p11 = phi * num_theta + theta % num_theta;
 
                 if phi > 1 {
-                    tris[tri].x = p10 as u32;
-                    tris[tri].y = p01 as u32;
-                    tris[tri].z = p00 as u32;
+                    tris[tri] = [p10 as u32, p01 as u32, p00 as u32];
                     tri += 1;
                 }
                 if phi < num_phi {
-                    tris[tri].x = p11 as u32;
-                    tris[tri].y = p01 as u32;
-                    tris[tri].z = p10 as u32;
+                    tris[tri] = [p11 as u32, p01 as u32, p10 as u32];
                     tri += 1;
                 }
             }
@@ -75,52 +61,50 @@ fn make_ground_plane<'a>(device: &'a Device) -> Geometry<'a> {
     {
         let mut verts = mesh.vertex_buffer.map();
         let mut quads = mesh.index_buffer.map();
-        verts[0] = Vector3::new(-10.0, -2.0, -10.0);
-        verts[1] = Vector3::new(-10.0, -2.0, 10.0);
-        verts[2] = Vector3::new(10.0, -2.0, 10.0);
-        verts[3] = Vector3::new(10.0, -2.0, -10.0);
+        verts[0] = Vec3::new(-10.0, -2.0, -10.0);
+        verts[1] = Vec3::new(-10.0, -2.0, 10.0);
+        verts[2] = Vec3::new(10.0, -2.0, 10.0);
+        verts[3] = Vec3::new(10.0, -2.0, -10.0);
 
-        quads[0] = Vector4::new(0, 1, 2, 3);
+        quads[0] = [0, 1, 2, 3];
     }
     let mut mesh = Geometry::Quad(mesh);
     mesh.commit();
     mesh
 }
 // Animate like the Embree example, returns the (transforms, normal_transforms)
-fn animate_instances(time: f32, num_instances: usize) -> (Vec<Matrix4<f32>>, Vec<Matrix4<f32>>) {
+fn animate_instances(time: f32, num_instances: usize) -> (Vec<Mat4>, Vec<Mat4>) {
     let t0 = 0.7 * time;
     let t1 = 1.5 * time;
 
-    let rot = Matrix4::from_cols(
-        Vector4::new(f32::cos(t1), 0.0, f32::sin(t1), 0.0),
-        Vector4::new(0.0, 1.0, 0.0, 0.0),
-        Vector4::new(-f32::sin(t1), 0.0, f32::cos(t1), 0.0),
-        Vector4::new(0.0, 0.0, 0.0, 1.0),
+    let rot = Mat4::new(
+        Vec4::new(f32::cos(t1), 0.0, f32::sin(t1), 0.0),
+        Vec4::new(0.0, 1.0, 0.0, 0.0),
+        Vec4::new(-f32::sin(t1), 0.0, f32::cos(t1), 0.0),
+        Vec4::new(0.0, 0.0, 0.0, 1.0),
     );
 
     let mut transforms = Vec::with_capacity(num_instances);
     let mut normal_transforms = Vec::with_capacity(num_instances);
     for i in 0..num_instances {
         let t = t0 + i as f32 * 2.0 * f32::consts::PI / 4.0;
-        let trans = Matrix4::<f32>::from_translation(
-            2.2 * Vector3::<f32>::new(f32::cos(t), 0.0, f32::sin(t)),
-        );
+        let trans = Mat4::from_translation(2.2 * Vec3::new(f32::cos(t), 0.0, f32::sin(t)));
         transforms.push(trans * rot);
-        normal_transforms.push(transforms[i].invert().unwrap().transpose());
+        normal_transforms.push(transforms[i].inversed().transposed());
     }
     (transforms, normal_transforms)
 }
 
 fn main() {
-    let mut display = support::Display::new(512, 512, "instancing");
+    let mut display = support::Display::new(512, 512, "instancing", None);
     let device = Device::new();
 
     // Make the scene we'll instance with 4 triangulated spheres.
     let spheres = vec![
-        make_triangulated_sphere(&device, Vector3::new(0.0, 0.0, 1.0), 0.5),
-        make_triangulated_sphere(&device, Vector3::new(1.0, 0.0, 0.0), 0.5),
-        make_triangulated_sphere(&device, Vector3::new(0.0, 0.0, -1.0), 0.5),
-        make_triangulated_sphere(&device, Vector3::new(-1.0, 0.0, 0.0), 0.5),
+        make_triangulated_sphere(&device, Vec3::new(0.0, 0.0, 1.0), 0.5),
+        make_triangulated_sphere(&device, Vec3::new(1.0, 0.0, 0.0), 0.5),
+        make_triangulated_sphere(&device, Vec3::new(0.0, 0.0, -1.0), 0.5),
+        make_triangulated_sphere(&device, Vec3::new(-1.0, 0.0, 0.0), 0.5),
     ];
     let mut instanced_scene = Scene::new(&device);
     for s in spheres.into_iter() {
@@ -145,35 +129,35 @@ fn main() {
 
     let instance_colors = vec![
         vec![
-            Vector3::new(0.25, 0.0, 0.0),
-            Vector3::new(0.5, 0.0, 0.0),
-            Vector3::new(0.75, 0.0, 0.0),
-            Vector3::new(1.00, 0.0, 0.0),
+            Vec3::new(0.25, 0.0, 0.0),
+            Vec3::new(0.5, 0.0, 0.0),
+            Vec3::new(0.75, 0.0, 0.0),
+            Vec3::new(1.00, 0.0, 0.0),
         ],
         vec![
-            Vector3::new(0.0, 0.25, 0.0),
-            Vector3::new(0.0, 0.50, 0.0),
-            Vector3::new(0.0, 0.75, 0.0),
-            Vector3::new(0.0, 1.00, 0.0),
+            Vec3::new(0.0, 0.25, 0.0),
+            Vec3::new(0.0, 0.50, 0.0),
+            Vec3::new(0.0, 0.75, 0.0),
+            Vec3::new(0.0, 1.00, 0.0),
         ],
         vec![
-            Vector3::new(0.0, 0.0, 0.25),
-            Vector3::new(0.0, 0.0, 0.50),
-            Vector3::new(0.0, 0.0, 0.75),
-            Vector3::new(0.0, 0.0, 1.00),
+            Vec3::new(0.0, 0.0, 0.25),
+            Vec3::new(0.0, 0.0, 0.50),
+            Vec3::new(0.0, 0.0, 0.75),
+            Vec3::new(0.0, 0.0, 1.00),
         ],
         vec![
-            Vector3::new(0.25, 0.25, 0.0),
-            Vector3::new(0.50, 0.50, 0.0),
-            Vector3::new(0.75, 0.75, 0.0),
-            Vector3::new(1.00, 1.00, 0.0),
+            Vec3::new(0.25, 0.25, 0.0),
+            Vec3::new(0.50, 0.50, 0.0),
+            Vec3::new(0.75, 0.75, 0.0),
+            Vec3::new(1.00, 1.00, 0.0),
         ],
     ];
 
     let ground = make_ground_plane(&device);
     let ground_id = scene.attach_geometry(ground);
 
-    let light_dir = Vector3::new(1.0, 1.0, -1.0).normalize();
+    let light_dir = Vec3::new(1.0, 1.0, -1.0).normalized();
     let mut intersection_ctx = IntersectContext::coherent();
 
     display.run(|image, camera_pose, time| {
@@ -215,11 +199,11 @@ fn main() {
                     let hit = &ray_hit.hit;
                     let geom_id = hit.geomID;
                     let inst_id = hit.instID[0];
-                    let mut normal = Vector3::new(hit.Ng_x, hit.Ng_y, hit.Ng_z).normalize();
+                    let mut normal = Vec3::new(hit.Ng_x, hit.Ng_y, hit.Ng_z).normalized();
                     if inst_id != u32::MAX {
                         let v = normal_transforms[inst_id as usize]
-                            * Vector4::new(normal.x, normal.y, normal.z, 0.0);
-                        normal = Vector3::new(v.x, v.y, v.z).normalize()
+                            * Vec4::new(normal.x, normal.y, normal.z, 0.0);
+                        normal = Vec3::new(v.x, v.y, v.z).normalized()
                     }
                     let mut illum = 0.3;
                     let shadow_pos = camera.pos + dir * ray_hit.ray.tfar;
@@ -227,8 +211,7 @@ fn main() {
                     rtscene.occluded(&mut intersection_ctx, &mut shadow_ray);
 
                     if shadow_ray.tfar >= 0.0 {
-                        illum =
-                            support::clamp(illum + f32::max(light_dir.dot(normal), 0.0), 0.0, 1.0);
+                        illum = (illum + f32::max(light_dir.dot(normal), 0.0)).clamp(0.0, 1.0);
                     }
 
                     let p = image.get_pixel_mut(i, j);
