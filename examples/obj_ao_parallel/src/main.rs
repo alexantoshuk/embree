@@ -224,8 +224,8 @@ fn main() {
         let mut tris =
             TriangleMesh::unanimated(&device, mesh.indices.len() / 3, mesh.positions.len() / 3);
         {
-            let mut verts = tris.vertex_buffer.map();
-            let mut tris = tris.index_buffer.map();
+            let mut verts = tris.vertex_buffer.as_mut_slice();
+            let mut tris = tris.index_buffer.as_mut_slice();
             for i in 0..mesh.positions.len() / 3 {
                 aabb = aabb.union_vec(&Vec3::new(
                     mesh.positions[i * 3],

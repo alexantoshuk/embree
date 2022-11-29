@@ -7,8 +7,8 @@ fn main() {
     // Make a triangle
     let mut triangle = TriangleMesh::unanimated(&device, 1, 3);
     {
-        let mut verts = triangle.vertex_buffer.map();
-        let mut tris = triangle.index_buffer.map();
+        let mut verts = triangle.vertex_buffer.as_mut_slice();
+        let mut tris = triangle.index_buffer.as_mut_slice();
         verts[0] = Vec3::new(-1.0, 0.0, 0.0);
         verts[1] = Vec3::new(0.0, 1.0, 0.0);
         verts[2] = Vec3::new(1.0, 0.0, 0.0);

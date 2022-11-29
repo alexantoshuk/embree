@@ -16,8 +16,8 @@ fn make_triangulated_sphere<'a>(device: &'a Device, pos: Vec3, radius: f32) -> G
         num_theta * (num_phi + 1),
     );
     {
-        let mut verts = mesh.vertex_buffer.map();
-        let mut tris = mesh.index_buffer.map();
+        let mut verts = mesh.vertex_buffer.as_mut_slice();
+        let mut tris = mesh.index_buffer.as_mut_slice();
 
         let inv_num_phi = 1.0 / (num_phi as f32);
         let inv_num_theta = 1.0 / (num_theta as f32);
@@ -59,8 +59,8 @@ fn make_triangulated_sphere<'a>(device: &'a Device, pos: Vec3, radius: f32) -> G
 fn make_ground_plane<'a>(device: &'a Device) -> Geometry<'a> {
     let mut mesh = QuadMesh::unanimated(device, 1, 4);
     {
-        let mut verts = mesh.vertex_buffer.map();
-        let mut quads = mesh.index_buffer.map();
+        let mut verts = mesh.vertex_buffer.as_mut_slice();
+        let mut quads = mesh.index_buffer.as_mut_slice();
         verts[0] = Vec3::new(-10.0, -2.0, -10.0);
         verts[1] = Vec3::new(-10.0, -2.0, 10.0);
         verts[2] = Vec3::new(10.0, -2.0, 10.0);

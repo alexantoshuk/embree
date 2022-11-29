@@ -4,43 +4,43 @@ use ultraviolet::*;
 
 fn make_cube<'a>(device: &'a Device) -> Geometry<'a> {
     let mut mesh = TriangleMesh::unanimated(device, 12, 8);
-    {
-        let mut verts = mesh.vertex_buffer.map();
-        let mut tris = mesh.index_buffer.map();
+    //{
+    let mut verts = mesh.vertex_buffer.as_mut_slice();
+    let mut tris = mesh.index_buffer.as_mut_slice();
 
-        verts[0] = Vec3::new(-1.0, -1.0, -1.0);
-        verts[1] = Vec3::new(-1.0, -1.0, 1.0);
-        verts[2] = Vec3::new(-1.0, 1.0, -1.0);
-        verts[3] = Vec3::new(-1.0, 1.0, 1.0);
-        verts[4] = Vec3::new(1.0, -1.0, -1.0);
-        verts[5] = Vec3::new(1.0, -1.0, 1.0);
-        verts[6] = Vec3::new(1.0, 1.0, -1.0);
-        verts[7] = Vec3::new(1.0, 1.0, 1.0);
+    verts[0] = Vec3::new(-1.0, -1.0, -1.0);
+    verts[1] = Vec3::new(-1.0, -1.0, 1.0);
+    verts[2] = Vec3::new(-1.0, 1.0, -1.0);
+    verts[3] = Vec3::new(-1.0, 1.0, 1.0);
+    verts[4] = Vec3::new(1.0, -1.0, -1.0);
+    verts[5] = Vec3::new(1.0, -1.0, 1.0);
+    verts[6] = Vec3::new(1.0, 1.0, -1.0);
+    verts[7] = Vec3::new(1.0, 1.0, 1.0);
 
-        // left side
-        tris[0] = [0, 2, 1];
-        tris[1] = [1, 2, 3];
+    // left side
+    tris[0] = [0, 2, 1];
+    tris[1] = [1, 2, 3];
 
-        // right side
-        tris[2] = [4, 5, 6];
-        tris[3] = [5, 7, 6];
+    // right side
+    tris[2] = [4, 5, 6];
+    tris[3] = [5, 7, 6];
 
-        // bottom side
-        tris[4] = [0, 1, 4];
-        tris[5] = [1, 5, 4];
+    // bottom side
+    tris[4] = [0, 1, 4];
+    tris[5] = [1, 5, 4];
 
-        // top side
-        tris[6] = [2, 6, 3];
-        tris[7] = [3, 6, 7];
+    // top side
+    tris[6] = [2, 6, 3];
+    tris[7] = [3, 6, 7];
 
-        // front side
-        tris[8] = [0, 4, 2];
-        tris[9] = [2, 4, 6];
+    // front side
+    tris[8] = [0, 4, 2];
+    tris[9] = [2, 4, 6];
 
-        // back side
-        tris[10] = [1, 3, 5];
-        tris[11] = [3, 7, 5];
-    }
+    // back side
+    tris[10] = [1, 3, 5];
+    tris[11] = [3, 7, 5];
+    //}
     let mut mesh = Geometry::Triangle(mesh);
     mesh.commit();
     mesh
@@ -48,8 +48,8 @@ fn make_cube<'a>(device: &'a Device) -> Geometry<'a> {
 fn make_ground_plane<'a>(device: &'a Device) -> Geometry<'a> {
     let mut mesh = QuadMesh::unanimated(device, 1, 4);
     {
-        let mut verts = mesh.vertex_buffer.map();
-        let mut quads = mesh.index_buffer.map();
+        let mut verts = mesh.vertex_buffer.as_mut_slice();
+        let mut quads = mesh.index_buffer.as_mut_slice();
         verts[0] = Vec3::new(-10.0, -2.0, -10.0);
         verts[1] = Vec3::new(-10.0, -2.0, 10.0);
         verts[2] = Vec3::new(10.0, -2.0, 10.0);
