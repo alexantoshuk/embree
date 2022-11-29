@@ -37,7 +37,7 @@ pub mod triangle_mesh;
 
 pub use bezier_curve::BezierCurve;
 pub use bspline_curve::BsplineCurve;
-pub use buffer::{Buffer, MappedBuffer};
+pub use buffer::Buffer;
 pub use catmull_rom_curve::CatmullRomCurve;
 pub use curve::CurveType;
 pub use device::Device;

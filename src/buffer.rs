@@ -73,16 +73,23 @@ impl<'a, T> Buffer<'a, T> {
             marker: PhantomData,
         }
     }
-    pub fn map(&mut self) -> MappedBuffer<'a, T> {
+
+    pub fn as_mut_slice(&mut self) -> &'a mut [T] {
         let len = self.bytes / mem::size_of::<T>();
-        let slice = unsafe { rtcGetBufferData(self.handle) as *mut T };
-        MappedBuffer {
-            buffer: PhantomData,
-            attachment: self.attachment,
-            slice: slice,
-            len: len,
+        unsafe {
+            let slice = rtcGetBufferData(self.handle) as *mut T;
+            std::slice::from_raw_parts_mut(slice, len)
         }
     }
+
+    pub fn as_slice(&mut self) -> &'a [T] {
+        let len = self.bytes / mem::size_of::<T>();
+        unsafe {
+            let slice = rtcGetBufferData(self.handle) as *const T;
+            std::slice::from_raw_parts(slice, len)
+        }
+    }
+
     pub(crate) fn set_attachment(&mut self, geom: RTCGeometry, buf_type: BufferType, slot: u32) {
         self.attachment.geom = geom;
         self.attachment.buf_type = buf_type;
@@ -99,52 +106,3 @@ impl<'a, T> Drop for Buffer<'a, T> {
 }
 
 unsafe impl<'a, T> Sync for Buffer<'a, T> {}
-
-pub struct MappedBuffer<'a, T: 'a> {
-    buffer: PhantomData<&'a mut Buffer<'a, T>>,
-    attachment: BufferAttachment,
-    slice: *mut T,
-    len: usize,
-}
-
-impl<'a, T: 'a> MappedBuffer<'a, T> {
-    pub fn len(&self) -> usize {
-        self.len
-    }
-}
-
-impl<'a, T: 'a> Drop for MappedBuffer<'a, T> {
-    fn drop(&mut self) {
-        if self.attachment.is_attached() {
-            // TODO: support for attaching one buffer to multiple geoms?
-            unsafe {
-                rtcUpdateGeometryBuffer(
-                    self.attachment.geom,
-                    self.attachment.buf_type,
-                    self.attachment.slot,
-                );
-            }
-        }
-    }
-}
-
-impl<'a, T: 'a> Index<usize> for MappedBuffer<'a, T> {
-    type Output = T;
-
-    fn index(&self, index: usize) -> &T {
-        // TODO: We should only check in debug build
-        if index >= self.len {
-            panic!("MappedBuffer index out of bounds");
-        }
-        unsafe { &*self.slice.offset(index as isize) }
-    }
-}
-
-impl<'a, T: 'a> IndexMut<usize> for MappedBuffer<'a, T> {
-    fn index_mut(&mut self, index: usize) -> &mut T {
-        if index >= self.len {
-            panic!("MappedBuffer index out of bounds");
-        }
-        unsafe { &mut *self.slice.offset(index as isize) }
-    }
-}
