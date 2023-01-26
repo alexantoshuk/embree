@@ -1,0 +1,11 @@
+[package]
+name = "subdiv"
+version = "0.1.0"
+authors = ["Will Usher <willusher.life@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+embree = { path = "../../" }
+support = { path = "../support" }
+ultraviolet = "0.9"
+

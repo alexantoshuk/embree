@@ -29,12 +29,13 @@ pub mod ray_packet;
 pub mod ray_stream;
 pub mod scene;
 pub mod soa_ray;
+pub mod subdiv_mesh;
+
 #[allow(non_upper_case_globals)]
 #[allow(non_camel_case_types)]
 #[allow(non_snake_case)]
 pub mod sys;
 pub mod triangle_mesh;
-
 pub use bezier_curve::BezierCurve;
 pub use bspline_curve::BsplineCurve;
 pub use buffer::Buffer;
@@ -54,6 +55,7 @@ pub use soa_ray::{
     SoAHit, SoAHitIter, SoAHitIterMut, SoAHitRef, SoARay, SoARayIter, SoARayIterMut, SoARayRef,
     SoARayRefMut,
 };
+pub use subdiv_mesh::SubdivMesh;
 pub use triangle_mesh::TriangleMesh;
 
 // Pull in some cleaned up enum and bitfield types directly,

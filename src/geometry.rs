@@ -7,11 +7,13 @@ use crate::hermite_curve;
 use crate::instance;
 use crate::linear_curve;
 use crate::quad_mesh;
+use crate::subdiv_mesh;
 use crate::triangle_mesh;
 
 pub enum Geometry<'a> {
     Triangle(triangle_mesh::TriangleMesh<'a>),
     Quad(quad_mesh::QuadMesh<'a>),
+    Subdiv(subdiv_mesh::SubdivMesh<'a>),
     Instance(instance::Instance<'a>),
     LinearCurve(linear_curve::LinearCurve<'a>),
     BsplineCurve(bspline_curve::BsplineCurve<'a>),
@@ -26,6 +28,7 @@ impl<'a> Geometry<'a> {
         match self {
             &Geometry::Triangle(ref m) => m.handle,
             &Geometry::Quad(ref q) => q.handle,
+            &Geometry::Subdiv(ref s) => s.handle,
             &Geometry::Instance(ref i) => i.handle,
             &Geometry::LinearCurve(ref lc) => lc.handle,
             &Geometry::BsplineCurve(ref bsc) => bsc.handle,
