@@ -23,11 +23,11 @@ fn main() {
         idx[2] = 2;
         idx[3] = 3;
     }
-    let mut tri_geom = Geometry::Subdiv(quad);
-    tri_geom.commit();
+    let mut subdiv_geom = Geometry::Subdiv(quad);
+    subdiv_geom.commit();
 
     let mut scene = Scene::new(&device);
-    scene.attach_geometry(tri_geom);
+    scene.attach_geometry(subdiv_geom);
     let rtscene = scene.commit();
 
     let mut intersection_ctx = IntersectContext::coherent();
