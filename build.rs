@@ -9,5 +9,5 @@ fn main() {
         println!("cargo:rustc-link-search=native={}", embree_dir.display());
         println!("cargo:rerun-if-env-changed=EMBREE_DIR");
     }
-    println!("cargo:rustc-link-lib=embree3");
+    println!("cargo:rustc-link-lib=static=embree3");
 }
