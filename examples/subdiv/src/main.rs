@@ -17,11 +17,8 @@ fn main() {
         verts[2] = Vec3::new(1.0, 1.0, 0.0);
         verts[3] = Vec3::new(1.0, 0.0, 0.0);
 
-        face[0] = 4;
-        idx[0] = 0;
-        idx[1] = 1;
-        idx[2] = 2;
-        idx[3] = 3;
+        face.copy_from_slice(&[4u32]);
+        idx.copy_from_slice(&[0u32, 1, 2, 3]);
     }
     let mut subdiv_geom = Geometry::Subdiv(quad);
     subdiv_geom.commit();
