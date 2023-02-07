@@ -40,7 +40,8 @@ impl<'a> Scene<'a> {
         id
     }
     /// Detach the geometry from the scene
-    pub fn deattach_geometry(&mut self, id: u32) -> Option<Geometry<'a>> {
+    pub fn detach_geometry(&mut self, id: u32) -> Option<Geometry<'a>> {
+        unsafe { rtcDetachGeometry(self.handle, id) };
         self.geometry.remove(&id)
     }
     /// Look up a geometry in the scene by the ID returned from `attach_geometry`
