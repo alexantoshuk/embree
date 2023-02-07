@@ -6,7 +6,7 @@ use support::Camera;
 use ultraviolet::*;
 
 fn make_linear_curve<'a>(device: &'a Device) -> Geometry<'a> {
-    let mut curve = LinearCurve::cone(&device, 2, 3, false);
+    let mut curve = LinearCurve::cone(&device, 3, 4, false);
     {
         let mut verts = curve.vertex_buffer.as_mut_slice();
         let mut ids = curve.index_buffer.as_mut_slice();
@@ -14,10 +14,12 @@ fn make_linear_curve<'a>(device: &'a Device) -> Geometry<'a> {
         verts[0] = Vec4::new(-5.0, 0.0, 0.0, 0.35);
         verts[1] = Vec4::new(-5.0, 4.0, -1.0, 0.25);
         verts[2] = Vec4::new(-5.0, 8.0, 2.0, 0.05);
+        verts[3] = Vec4::new(-5.0, 12.0, 2.0, 0.05);
         ids[0] = 0;
         ids[1] = 1;
-        flags[0] = 10;
-        flags[1] = 1;
+        ids[2] = 2;
+        // flags[0] = 10;
+        // flags[1] = 1;
     }
     let mut curve_geo = Geometry::LinearCurve(curve);
     curve_geo.commit();
